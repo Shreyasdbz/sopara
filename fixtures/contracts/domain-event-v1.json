@@ -1,0 +1,15 @@
+{
+  "aggregate_id": "dataset-1",
+  "aggregate_type": "DatasetState",
+  "actor": "owner",
+  "event_id": "event-1",
+  "event_type": "DatasetState.state_changed",
+  "occurred_at_ns": 1,
+  "payload": [
+    ["from_state", "DISCOVERED"],
+    ["to_state", "INGESTING"]
+  ],
+  "reason_codes": ["INVALID_SCHEMA"],
+  "schema_version": "sopara.domain-event.v1",
+  "sequence": 1
+}

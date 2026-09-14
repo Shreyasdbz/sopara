@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sopara.invalid/contracts/events/v1.schema.json",
+  "title": "Sopara domain event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "aggregate_id",
+    "aggregate_type",
+    "actor",
+    "event_id",
+    "event_type",
+    "occurred_at_ns",
+    "payload",
+    "reason_codes",
+    "schema_version",
+    "sequence"
+  ],
+  "properties": {
+    "aggregate_id": { "type": "string", "minLength": 1 },
+    "aggregate_type": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 },
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "type": "string", "minLength": 1 },
+    "occurred_at_ns": { "type": "integer", "minimum": 0 },
+    "payload": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [{ "type": "string" }, { "type": "string" }],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": { "$ref": "../reason-codes/v1.schema.json" },
+      "minItems": 1
+    },
+    "schema_version": { "const": "sopara.domain-event.v1" },
+    "sequence": { "type": "integer", "minimum": 1 }
+  }
+}

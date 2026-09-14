@@ -1,0 +1,1 @@
+"""Historical replay serialization adapters."""

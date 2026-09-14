@@ -1,0 +1,11 @@
+.git
+.venv
+.terraform
+node_modules
+web/node_modules
+web/.output
+build
+test-results
+playwright-report
+*.tfstate*
+.env*

@@ -1,0 +1,50 @@
+steps:
+  - id: python-checks
+    name: ghcr.io/astral-sh/uv:0.12.11-python3.14-trixie-slim@sha256:967bc7d17bbc9abd6602db848df285dcf7078334d0fa2b00c940935350cc6f7e
+    entrypoint: sh
+    args:
+      - -ceu
+      - uv sync --locked && uv run --locked ruff format --check src tests scripts && uv run --locked ruff check src tests scripts && uv run --locked pyright && uv run --locked pytest tests/foundation tests/unit tests/property tests/contract && uv run --locked lint-imports && uv run --locked python scripts/check_repository.py && uv run --locked python scripts/check_frontend_architecture.py && uv run --locked python scripts/check_licenses.py
+
+  - id: web-checks
+    name: oven/bun:1.4.2-alpine@sha256:d888c0ae6c86d7866ff10c5aafdd9077b36aee6455b33dd270fb93c0dd5cef6f
+    dir: web
+    entrypoint: sh
+    args:
+      - -ceu
+      - bun install --frozen-lockfile && bun run check && bun run build
+
+  - id: postgres-integration
+    name: gcr.io/cloud-builders/docker@sha256:e036091375b816e40f07620582d1dfaa0e2c2da58ea5731fdcf560534b2a4a57
+    entrypoint: sh
+    args:
+      - -ceu
+      - sh scripts/test_integration_cloudbuild.sh
+
+  - id: terraform-checks
+    name: hashicorp/terraform:1.16.2@sha256:c3308fcbb530627c102c4c4b993e226b202429084328c3cc505cc2a69342e883
+    dir: infra/terraform
+    entrypoint: sh
+    args:
+      - -ceu
+      - terraform init -backend=false -input=false && terraform fmt -check -recursive && terraform validate
+
+  - id: image-build
+    name: gcr.io/cloud-builders/docker@sha256:e036091375b816e40f07620582d1dfaa0e2c2da58ea5731fdcf560534b2a4a57
+    args:
+      - build
+      - --tag=sopara-foundation:${BUILD_ID}
+      - .
+
+  - id: image-inspection
+    name: gcr.io/cloud-builders/docker@sha256:e036091375b816e40f07620582d1dfaa0e2c2da58ea5731fdcf560534b2a4a57
+    args:
+      - run
+      - --rm
+      - --entrypoint=sh
+      - sopara-foundation:${BUILD_ID}
+      - -ceu
+      - python --version; python -c "from sopara.domain.instruments import NES; from sopara.api.app import create_app; assert str(NES.tick_value.value) == '0.250'"; sopara --help >/dev/null; test -f /app/static/_shell.html; test -d /app/static/assets; test -z "$$(command -v node || true)"; test -z "$$(command -v bun || true)"; test -z "$$(command -v bunx || true)"; test ! -e /web; echo "container runtime checks passed"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

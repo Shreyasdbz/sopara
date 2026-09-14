@@ -1,0 +1,103 @@
+[build-system]
+requires = ["uv_build==0.12.11"]
+build-backend = "uv_build"
+
+[project]
+name = "sopara"
+version = "0.0.0"
+description = "Private deterministic ES-to-NES evidence lab"
+readme = "README.md"
+requires-python = "==3.14.*"
+license = "LicenseRef-Proprietary"
+dependencies = [
+  "alembic==1.19.2",
+  "cachecontrol==0.14.4",
+  "fastapi==0.141.1",
+  "google-auth==2.58.0",
+  "google-cloud-storage==3.14.1",
+  "polars>=1.44,<1.45",
+  "psycopg[binary,pool]>=3.3,<3.4",
+  "pydantic-settings>=2.12,<3",
+  "pyarrow==25.0.1",
+  "requests==2.34.2",
+  "sqlalchemy[asyncio]==2.0.52",
+  "uvicorn[standard]>=0.41,<0.42",
+]
+
+[project.scripts]
+sopara = "sopara.cli:main"
+
+[dependency-groups]
+dev = [
+  "hypothesis>=6.151,<7",
+  "import-linter>=2.9,<3",
+  "pip-licenses>=5.5,<6",
+  "pyright>=1.1.405,<2",
+  "pytest>=9.0,<10",
+  "pytest-asyncio>=1.3,<2",
+  "httpx2==2.12.0",
+  "ruff>=0.14,<0.15",
+]
+
+[tool.uv]
+required-version = "==0.12.11"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ASYNC",
+  "B",
+  "C4",
+  "E",
+  "F",
+  "I",
+  "N",
+  "PERF",
+  "PIE",
+  "PT",
+  "RUF",
+  "S",
+  "SIM",
+  "UP",
+  "W",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+
+[tool.pyright]
+include = ["src", "tests"]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = "warning"
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -ra"
+testpaths = ["tests"]
+xfail_strict = true
+
+[tool.importlinter]
+root_packages = ["sopara"]
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "The domain has no application or adapter dependencies"
+type = "forbidden"
+source_modules = ["sopara.domain"]
+forbidden_modules = [
+  "sopara.adapters",
+  "sopara.api",
+  "sopara.application",
+  "sopara.jobs",
+  "sopara.settings",
+  "alembic",
+  "fastapi",
+  "google",
+  "psycopg",
+  "sqlalchemy",
+]
